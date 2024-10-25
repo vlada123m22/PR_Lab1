@@ -11,7 +11,7 @@ public class ScrappingController {
 
 
     @GetMapping("/parse")
-    public String handleRequest() {
-        return scrappingService.scrapPage();
+    public void handleRequest() {
+        scrappingService.scrapPage();
     }
 }

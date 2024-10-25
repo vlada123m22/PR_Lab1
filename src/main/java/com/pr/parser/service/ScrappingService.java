@@ -12,6 +12,8 @@ import org.jsoup.nodes.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -38,18 +40,35 @@ public class ScrappingService {
     }
 
 
-    public String scrapPage() {
-        Mono<String> result = webClientService.fetchHtmlContent("/catalog/electronics/telephones/mobile/?page_=page_3");
-        result.subscribe(htmlContent -> {
+    public Mono<Map<String, String>> scrapeAdditionalData(String productLink) {
+        return webClientService.fetchHtmlContent(productLink)
+                .map(html -> parseCharacteristics(Jsoup.parse(html)));
+    }
+    private Map<String, String> parseCharacteristics(Document document) {
+        return document.select("div.tab-pane-inner")
+                .select("table")
+                .select("tr")
+                .stream()
+                .map(row -> row.select("td"))
+                .filter(columns -> columns.size() == 2)
+                .collect(
+                        HashMap::new,
+                        (map, columns) -> map.put(columns.get(0).text(), columns.get(1).text()),
+                        HashMap::putAll
+                );
+    }
+    public void scrapPage() {
+        webClientService.fetchHtmlContent("/ro/catalog/electronics/telephones/mobile/?page_=page_3").subscribe(htmlContent -> {
             List<Product> products = parseHtmlForProducts(htmlContent);
-            //products.forEach(System.out::println);
-            for (Product p : products) {
-                System.out.println( "Product Name: "  + p.getName());
-                System.out.println("Product Price: "+ p.getPrice());
-                System.out.println("Product Link: " + p.getLink());
+            for (Product product : products) {
+                scrapeAdditionalData(product.getLink()).subscribe(characteristics -> {
+                    product.setCharacteristics(characteristics);
+                    System.out.println("Product name: " + product.getName());
+                    System.out.println("Product price: " +product.getPrice());
+                    System.out.println("Product Link: " + product.getLink());
+                    System.out.println("Product details: " +product.getCharacteristics());
+                });
             }
-            System.out.println("Total products: " + products.size());
         });
-        return result.block();
     }
 }
