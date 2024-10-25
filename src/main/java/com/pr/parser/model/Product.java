@@ -1,11 +1,11 @@
 package com.pr.parser.model;
 
-import lombok.Data;
-
+import lombok.Builder;
 import java.util.Map;
 
-
+@Builder
 public class Product {
+
     private String name;
     private String price;
     private String link;

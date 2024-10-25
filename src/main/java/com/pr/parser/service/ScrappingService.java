@@ -1,6 +1,7 @@
 package com.pr.parser.service;
 
 import com.pr.parser.config.ScrappingProperties;
+import com.pr.parser.validation.ProductValidator;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -19,7 +20,7 @@ import java.util.HashMap;
 @RequiredArgsConstructor
 public class ScrappingService {
     private final WebClientService webClientService;
-
+    private final ProductValidator productValidator;
     private final ScrappingProperties scrappingProperties;
 
     public List<Product> parseHtmlForProducts(String html) {
@@ -30,11 +31,17 @@ public class ScrappingService {
             var productName = productElement.select("meta[itemprop=name]").attr("content");
             var productPrice = productElement.select(".card-price_curr").text();
             var productLink = scrappingProperties.getBaseUrl() + productElement.select("a[itemprop=url]").attr("href");
-            var product = new Product();
-            product.setName(productName);
-            product.setPrice(productPrice);
-            product.setLink(productLink);
+
+            var product = Product.builder()
+                    .name(productName)
+                    .price(productPrice)
+                    .link(productLink)
+                    .build();
+
+            productValidator.validate(product);
+
             products.add(product);
+
         }
         return products;
     }
