@@ -5,11 +5,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebConfig {
-    private static final String BASE_URL = "https://www.pandashop.md/ru";
+    private final ScrappingProperties scrappingProperties;
+
+    public WebConfig(ScrappingProperties scrappingProperties) {
+        this.scrappingProperties = scrappingProperties;
+    }
+
     @Bean
     public WebClient webClient() {
         return WebClient.builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(scrappingProperties.getBaseUrl())
                 .build();
     }
 }
