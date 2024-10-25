@@ -1,15 +1,19 @@
 package com.pr.parser.specs;
 
 import org.springframework.stereotype.Component;
+
 import java.util.Arrays;
+
 @Component
 public class ProductSpecificationFactory {
+
     public ProductSpecification createSpecification(String key, String value) {
         if (key.equals("price")) {
             return new PriceComparisonSpecification(value);
         }
         return product -> true;
     }
+
     public ProductSpecification createCombinedSpecificationFromSearch(String search) {
         return Arrays.stream(search.split(","))
                 .filter(condition -> condition != null && !condition.trim().isEmpty())
@@ -24,4 +28,6 @@ public class ProductSpecificationFactory {
                 })
                 .reduce(product -> true, ProductSpecification::and);
     }
+
+
 }

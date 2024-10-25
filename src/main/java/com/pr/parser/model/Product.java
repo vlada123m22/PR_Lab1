@@ -1,55 +1,25 @@
 package com.pr.parser.model;
 
-import com.pr.parser.enumeration.Currency;
+import com.pr.parser.enums.Currency;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Map;
 
+@Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Product {
-
     private String name;
     private String price;
     private String link;
-    private Map<String, String> characteristics;
     private Currency currency;
+    private Map<String, String> characteristics;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
-    public String getLink() {
-        return link;
-    }
-
-    public void setLink(String link) {
-        this.link = link;
-    }
-
-    public Map<String, String> getCharacteristics() {
-        return characteristics;
-    }
-
-    public void setCharacteristics(Map<String, String> characteristics) {
-        this.characteristics = characteristics;
-    }
-
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
+    public String toString() {
+        return "Product(name=" + this.getName() + ", price=" + this.getPrice() + ", link=" + this.getLink() + ", currency=" + this.getCurrency() + ", characteristics=" + this.getCharacteristics() + ")";
     }
 }

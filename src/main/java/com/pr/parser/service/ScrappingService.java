@@ -1,6 +1,6 @@
 package com.pr.parser.service;
 
-import com.pr.parser.enumeration.Currency;
+import com.pr.parser.enums.Currency;
 import com.pr.parser.model.FilteredProductsResult;
 import com.pr.parser.model.Product;
 import com.pr.parser.specs.ProductSpecificationFactory;
@@ -11,7 +11,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -61,7 +60,6 @@ public class ScrappingService {
     public Mono<Map<String, String>> scrapeAdditionalData(String productLink) {
         System.out.println("Scraping additional data for product: " + productLink);
         return webClientService.fetchHtmlContent(productLink)
-                .doOnNext(html -> System.out.println("Product HTML: " + html))
                 .map(html -> parseCharacteristics(Jsoup.parse(html)));
     }
 
@@ -102,17 +100,15 @@ public class ScrappingService {
 
 
     public Mono<List<Product>> getAllProducts() {
-        return webClientService.fetchHtmlContent("/ru/catalog/electronics/telephones/mobile/?page_=page_3")
+        return webClientService.fetchHtmlContent("/ro/catalog/electronics/telephones/mobile/?page_=page_3")
                 .flatMapMany(this::parseHtmlForProducts)
                 .collectList();
     }
 
     public Mono<FilteredProductsResult> getFilteredProducts(String params) {
-        return webClientService.fetchHtmlContent("/ru/catalog/electronics/telephones/mobile/?page_=page_3")
+        return webClientService.fetchHtmlContent("/ro/catalog/electronics/telephones/mobile/?page_=page_3")
                 .flatMapMany(this::parseHtmlForProducts)
                 .collectList()
                 .flatMap(products -> processProducts(products, params));
     }
-
-
 }

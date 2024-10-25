@@ -1,15 +1,15 @@
-package com.pr.parser.config;
+package com.pr.parser.rest;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
-@Configuration
-public class WebConfig {
-    private final ScrappingProperties scrappingProperties;
 
-    public WebConfig(ScrappingProperties scrappingProperties) {
-        this.scrappingProperties = scrappingProperties;
-    }
+@Configuration
+@RequiredArgsConstructor
+public class WebClientConfig {
+
+    private final ScrappingProperties scrappingProperties;
 
     @Bean
     public WebClient webClient() {

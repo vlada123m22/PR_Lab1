@@ -1,9 +1,10 @@
-package com.pr.parser.rules;
+package com.pr.parser.validation.rules;
 
-import com.pr.parser.rules.ValidatorRule;
 import org.springframework.stereotype.Component;
+
 @Component
 public class NameRule implements ValidatorRule<String> {
+
     @Override
     public String validate(String value) {
         if (value == null) {
@@ -11,4 +12,5 @@ public class NameRule implements ValidatorRule<String> {
         }
         return value.trim();
     }
+
 }
