@@ -3,7 +3,6 @@ package com.pr.parser.service;
 import com.pr.parser.enumeration.Currency;
 import com.pr.parser.model.FilteredProductsResult;
 import com.pr.parser.model.Product;
-import com.pr.parser.config.ScrappingProperties;
 import com.pr.parser.specs.ProductSpecificationFactory;
 import com.pr.parser.utils.PriceConverterUtils;
 import com.pr.parser.validation.ProductValidator;
@@ -12,6 +11,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -27,11 +27,10 @@ public class ScrappingService {
 
     private final WebClientService webClientService;
 
-    private final ScrappingProperties scrappingProperties;
-
     private final ProductValidator productValidator;
 
     private final ProductSpecificationFactory productSpecificationFactory;
+
     public Flux<Product> parseHtmlForProducts(String html) {
         Document document = Jsoup.parse(html);
         Elements productElements = document.select(".js-itemsList-item");
@@ -40,14 +39,17 @@ public class ScrappingService {
                 .flatMap(productElement -> {
                     var productName = productElement.select("meta[itemprop=name]").attr("content");
                     var productPrice = productElement.select(".card-price_curr").text();
-                    var productLink = scrappingProperties.getBaseUrl() + productElement.select("a[itemprop=url]").attr("href");
+                    var productLink = productElement.select("a[itemprop=url]").attr("href");
+
                     var product = Product.builder()
                             .name(productName)
                             .price(productPrice)
                             .link(productLink)
                             .currency(Currency.MDL)
                             .build();
+
                     productValidator.validate(product);
+
                     return scrapeAdditionalData(product.getLink())
                             .map(characteristics -> {
                                 product.setCharacteristics(characteristics);
@@ -57,7 +59,9 @@ public class ScrappingService {
     }
 
     public Mono<Map<String, String>> scrapeAdditionalData(String productLink) {
+        System.out.println("Scraping additional data for product: " + productLink);
         return webClientService.fetchHtmlContent(productLink)
+                .doOnNext(html -> System.out.println("Product HTML: " + html))
                 .map(html -> parseCharacteristics(Jsoup.parse(html)));
     }
 
@@ -95,28 +99,20 @@ public class ScrappingService {
                     return Mono.just(new FilteredProductsResult(filteredProducts, totalSum, timestamp));
                 });
     }
+
+
     public Mono<List<Product>> getAllProducts() {
-        return webClientService.fetchHtmlContent("/ro/catalog/electronics/telephones/mobile/?page_=page_3")
+        return webClientService.fetchHtmlContent("/ru/catalog/electronics/telephones/mobile/?page_=page_3")
                 .flatMapMany(this::parseHtmlForProducts)
                 .collectList();
     }
+
     public Mono<FilteredProductsResult> getFilteredProducts(String params) {
-        return webClientService.fetchHtmlContent("/ro/catalog/electronics/telephones/mobile/?page_=page_3")
+        return webClientService.fetchHtmlContent("/ru/catalog/electronics/telephones/mobile/?page_=page_3")
                 .flatMapMany(this::parseHtmlForProducts)
                 .collectList()
                 .flatMap(products -> processProducts(products, params));
     }
-    public void scrapPage() {
-//        webClientService.fetchHtmlContent("/ru/catalog/electronics/telephones/mobile/?page_=page_3")
-//                .flatMapMany(this::parseHtmlForProducts)
-//                .collectList()
-//                .flatMap(products -> processProducts(products, ">= 1000"))
-//                .subscribe(result -> {
-//                    System.out.println("Filtered Products: " + result.getFilteredProducts());
-//                    System.out.println("Total Sum: " + result.getTotalSum());
-//                    System.out.println("Timestamp: " + result.getTimestamp());
-//                }, error -> {
-//                    System.err.println("Error occurred: " + error.getMessage());
-//                });
-    }
+
+
 }
