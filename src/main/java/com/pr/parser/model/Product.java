@@ -1,5 +1,6 @@
 package com.pr.parser.model;
 
+import com.pr.parser.enumeration.Currency;
 import lombok.Builder;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ public class Product {
     private String price;
     private String link;
     private Map<String, String> characteristics;
+    private Currency currency;
 
     public String getName() {
         return name;
@@ -41,5 +43,13 @@ public class Product {
 
     public void setCharacteristics(Map<String, String> characteristics) {
         this.characteristics = characteristics;
+    }
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
 }
